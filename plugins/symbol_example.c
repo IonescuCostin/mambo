@@ -51,6 +51,6 @@ __attribute__((constructor)) void memcheck_init_plugin() {
   mambo_context *ctx = mambo_register_plugin();
   assert(ctx != NULL);
 
-  int ret = mambo_register_function_cb(ctx, "malloc", &hook, NULL);;
+  int ret = mambo_register_function_cb(ctx, "malloc", &hook, NULL, -1);
   assert(ret == MAMBO_SUCCESS);
 }

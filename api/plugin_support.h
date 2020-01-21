@@ -134,7 +134,7 @@ int mambo_register_post_thread_cb(mambo_context *ctx, mambo_callback cb);
 int mambo_register_exit_cb(mambo_context *ctx, mambo_callback cb);
 int mambo_register_vm_op_cb(mambo_context *ctx, mambo_callback cb);
 int mambo_register_function_cb(mambo_context *ctx, char *fn_name,
-                               mambo_callback cb_pre, mambo_callback cb_post);
+                               mambo_callback cb_pre, mambo_callback cb_post, int max_args);
 
 /* Memory management */
 void *mambo_alloc(mambo_context *ctx, size_t size);

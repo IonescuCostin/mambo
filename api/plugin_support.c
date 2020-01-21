@@ -114,8 +114,14 @@ int mambo_register_vm_op_cb(mambo_context *ctx, mambo_callback cb) {
 }
 
 int mambo_register_function_cb(mambo_context *ctx, char *fn_name,
-                               mambo_callback cb_pre, mambo_callback cb_post) {
+                               mambo_callback cb_pre, mambo_callback cb_post, int max_args) {
+#ifdef __arm__
+  #define ARG_LIMIT 4
+#elif __aarch64__
+  #define ARG_LIMIT 8
+#endif
   if (cb_pre == NULL && cb_post == NULL) return -1;
+  if (cb_post && (max_args > ARG_LIMIT || max_args < 0)) return -2;
   return function_watch_add(&global_data.watched_functions, fn_name, ctx->plugin_id, cb_pre, cb_post);
 }
 
