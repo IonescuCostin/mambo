@@ -255,7 +255,7 @@ typedef struct {
 
   int funcp_count;
   pthread_mutex_t funcps_lock;
-  watched_funcp_t funcps[MAX_WATCHED_FUNCS];
+  watched_funcp_t funcps[MAX_WATCHED_FUNC_PTRS];
 } watched_functions_t;
 
 typedef struct {
