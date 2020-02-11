@@ -168,19 +168,25 @@ int function_watch_add(watched_functions_t *self, char *name, int plugin_id,
 /* Memory barriers used in function modifying funcps because the
    mutex doesn't protect from reading */
 int function_watch_addp(watched_functions_t *self, watched_func_t *func, void *addr) {
+  int err = 0;
+
   function_watch_lock_funcps(self);
 
   int idx = self->funcp_count;
-  if (idx >= MAX_WATCHED_FUNC_PTRS) return -2;
+  if (idx >= MAX_WATCHED_FUNC_PTRS) {
+    err = -2;
+    goto ret;
+  }
 
   self->funcps[idx].func = func;
   self->funcps[idx].addr = addr;
   asm volatile("DMB SY" ::: "memory");
   self->funcp_count++;
 
+ret:
   function_watch_unlock_funcps(self);
 
-  return 0;
+  return err;
 }
 
 int function_watch_try_addp(watched_functions_t *self, char *name, void *addr) {
