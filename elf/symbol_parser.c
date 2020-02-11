@@ -172,6 +172,12 @@ int function_watch_addp(watched_functions_t *self, watched_func_t *func, void *a
 
   function_watch_lock_funcps(self);
 
+  for (int i = 0; i < self->funcp_count; i++) {
+    if (self->funcps[i].func == func && self->funcps[i].addr == addr) {
+      goto ret;
+    }
+  }
+
   int idx = self->funcp_count;
   if (idx >= MAX_WATCHED_FUNC_PTRS) {
     err = -2;
