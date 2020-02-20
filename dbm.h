@@ -246,8 +246,8 @@ typedef struct {
   watched_func_t *func;
 } watched_funcp_t;
 
-#define MAX_WATCHED_FUNCS 20
-#define MAX_WATCHED_FUNC_PTRS 40
+#define MAX_WATCHED_FUNCS 40
+#define MAX_WATCHED_FUNC_PTRS 80
 typedef struct {
   int func_count;
   pthread_mutex_t funcs_lock;
