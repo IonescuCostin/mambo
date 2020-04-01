@@ -8,6 +8,7 @@
 #PLUGINS+=plugins/strace.c
 #PLUGINS+=plugins/symbol_example.c
 #PLUGINS+=plugins/memcheck/memcheck.S plugins/memcheck/memcheck.c plugins/memcheck/naive_stdlib.c
+#TEXT_SEGMENT = 0x7000000000 # MAMBO needs to be linked at this address for memcheck
 
 OPTS= -DDBM_LINK_UNCOND_IMM
 OPTS+=-DDBM_INLINE_UNCOND_IMM
