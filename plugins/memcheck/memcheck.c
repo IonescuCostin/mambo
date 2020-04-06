@@ -254,10 +254,10 @@ bool memcheck_should_ignore(mambo_context *ctx) {
       iw == 0xa9400c22 ||  // strlen + 0x114
       iw == 0xa8c11444 ||  // strcpy + 0xd8
       iw == 0xf8408424 ||  // bcmp + 0x24
-      iw == 0x39400824 ||  // strcspn + 0xdc
-      iw == 0x39400c20 ||  // strcspn + 0xe0
-      iw == 0x39400423 ||  // strcspn + 0xe4
-      iw == 0x39400c43   // strspn + +0xe4
+      iw == 0x39400820 ||  // strcspn + 0xdc
+      iw == 0x39400c22 ||  // strcspn + 0xe0
+      iw == 0x39400424 ||  // strcspn + +0xe4
+      iw == 0x39400c43     // strspn + 0xe4
   ) return true;
   #endif
 
