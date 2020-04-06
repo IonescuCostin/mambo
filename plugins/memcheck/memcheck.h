@@ -18,7 +18,15 @@
 */
 
 #define COMPACT_SHADOW 1
+
+/* ignore invalid accesses from a list of instructions found in glibc functions
+   known to perform safe (aligned) out-of-bounds reads for performance optimisation
+   may lead to false negatives */
 #define MC_IGNORE_LIST 1
+
+/* replace the standard library functions known to have glibc implementations that
+   perform safe (aligned) out-of-bounds reads for performance reasons
+   the replacement implementations are naive - may affect application performance */
 //#define REPLACE_FNS 1
 
 #ifdef COMPACT_SHADOW
