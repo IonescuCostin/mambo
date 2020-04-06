@@ -120,6 +120,39 @@ char *memcheck_strchrnul(const char *s, int c) {
   return p;
 }
 
+size_t memcheck_strspn(const char *s, const char *accept) {
+  size_t len = 0;
+  char *p = (char *)s;
+  for (; *p != '\0'; p++) {
+    //printf("%c\n", *p);
+    bool match = false;
+    for (int i = 0; accept[i] != '\0' && !match; i++) {
+      //printf(" %c\n", accept[i]);
+      if (*p == accept[i]) {
+        match = true;
+        break;
+      }
+    }
+    if (!match) return len;
+    len++;
+  } // end of the string
+  return len;
+}
+
+size_t memcheck_strcspn(const char *s, const char *reject) {
+  size_t len = 0;
+  char *p = (char *)s;
+  for (; *p != '\0'; p++) {
+    for (int i = 0; reject[i] != '\0'; i++) {
+      if (*p == reject[i]) {
+        return len;
+      }
+    }
+    len++;
+  } // end of the string
+  return len;
+}
+#if 1
 int memcheck_replace_strlen(mambo_context *ctx) {
   int ret = mambo_set_source_addr(ctx, memcheck_strlen);
   assert(ret == 0);
@@ -180,6 +213,16 @@ int memcheck_replace_strchrnul(mambo_context *ctx) {
   assert(ret == 0);
 }
 
+int memcheck_replace_strspn(mambo_context *ctx) {
+  int ret = mambo_set_source_addr(ctx, memcheck_strspn);
+  assert(ret == 0);
+}
+
+int memcheck_replace_strcspn(mambo_context *ctx) {
+  int ret = mambo_set_source_addr(ctx, memcheck_strcspn);
+  assert(ret == 0);
+}
+
 void memcheck_install_naive_stdlib(mambo_context *ctx) {
   int ret;
   /* Replace the stdlib functions which use hand-optimised assembly with
@@ -218,5 +261,11 @@ void memcheck_install_naive_stdlib(mambo_context *ctx) {
   assert(ret == MAMBO_SUCCESS);
 
   ret = mambo_register_function_cb(ctx, "strnlen", &memcheck_replace_strnlen, NULL, 1);
+  assert(ret == MAMBO_SUCCESS);
+
+  ret = mambo_register_function_cb(ctx, "strspn", &memcheck_replace_strspn, NULL, 1);
+  assert(ret == MAMBO_SUCCESS);
+
+  ret = mambo_register_function_cb(ctx, "strcspn", &memcheck_replace_strcspn, NULL, 1);
   assert(ret == MAMBO_SUCCESS);
 }
