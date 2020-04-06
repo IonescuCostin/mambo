@@ -544,6 +544,20 @@ void __memcheck_mark_valid(uintptr_t addr, size_t size) {
   memcheck_mark_valid(alias, size);
 }
 
+size_t memcheck_malloc_usable_size(uintptr_t ptr) {
+  uintptr_t alloc_size = 0;
+  int ret = mambo_ht_get(&allocs, ptr, &alloc_size);
+  return alloc_size;
+}
+
+extern void memcheck_ret();
+int memcheck_replace_malloc_usable_size(mambo_context *ctx) {
+  int ret = emit_safe_fcall(ctx, memcheck_malloc_usable_size, MAX_FCALL_ARGS);
+  assert(ret == 0);
+  ret = mambo_set_source_addr(ctx, memcheck_ret);
+  assert(ret == 0);
+}
+
 __attribute__((constructor)) void memcheck_init_plugin() {
   int ret;
 
@@ -632,6 +646,9 @@ __attribute__((constructor)) void memcheck_init_plugin() {
   assert(ret == MAMBO_SUCCESS);
 
   ret = mambo_register_function_cb(ctx, "__malloc_arena_thread_freeres", &memcheck_inst_ignored_fn, &memcheck_inst_ignored_fn_post, 1);
+  assert(ret == MAMBO_SUCCESS);
+
+  ret = mambo_register_function_cb(ctx, "malloc_usable_size", &memcheck_replace_malloc_usable_size, NULL, 1);
   assert(ret == MAMBO_SUCCESS);
 #ifdef REPLACE_FNS
   memcheck_install_naive_stdlib(ctx);

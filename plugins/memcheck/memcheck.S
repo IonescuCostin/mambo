@@ -234,3 +234,12 @@ skip_err:
 #endif
 .endfunc
 
+
+.global memcheck_ret
+.func
+memcheck_ret:
+#ifdef __aarch64__
+  RET
+#elif __arm__
+  BX LR
+#endif
