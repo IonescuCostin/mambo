@@ -31,6 +31,8 @@
 
 #include "memcheck.h"
 
+extern void memcheck_install_naive_stdlib(mambo_context *ctx);
+
 
 #define IS_STORE (1 << 15)
 
