@@ -71,7 +71,7 @@ cachesim:
 	PLUGINS="plugins/cachesim/cachesim.c plugins/cachesim/cachesim.S plugins/cachesim/cachesim_model.c" OUTPUT_FILE=mambo_cachesim make
 
 clean:
-	rm -f dbm elf/elf_loader.o
+	rm -f dbm elf/elf_loader.o elf/symbol_parser.o
 
 cleanall: clean
 	$(MAKE) -C pie/ clean
