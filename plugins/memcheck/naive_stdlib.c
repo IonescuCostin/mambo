@@ -152,7 +152,7 @@ size_t memcheck_strcspn(const char *s, const char *reject) {
   } // end of the string
   return len;
 }
-#if 1
+
 int memcheck_replace_strlen(mambo_context *ctx) {
   int ret = mambo_set_source_addr(ctx, memcheck_strlen);
   assert(ret == 0);
