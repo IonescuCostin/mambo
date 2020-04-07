@@ -154,13 +154,13 @@ void memcheck_free_hook(void *start, size_t size) {
   uintptr_t alloc_size;
   int ret = mambo_ht_get(&allocs, (uintptr_t)start, &alloc_size);
   if (ret != 0) {
-    printf("\n==memcheck== invalid free for %p\n\n", start);
+    fprintf(stderr, "\n==memcheck== invalid free for %p\n\n", start);
     return;
   }
   size = alloc_size;
 
   if (size == MAGIC_FREED) {
-    printf("\n==memcheck== double free for %p\n\n", start);
+    fprintf(stderr, "\n==memcheck== double free for %p\n\n", start);
   } else {
     ret = mambo_ht_add(&allocs, (uintptr_t)start, MAGIC_FREED);
     assert(ret == 0);
