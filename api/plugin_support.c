@@ -273,7 +273,7 @@ int mambo_set_source_addr(mambo_context *ctx, void *source_addr) {
   }
 #endif
 
-  ctx->code.read_address = (void *)source_addr;
+  ctx->code.read_address = (void *)((uintptr_t)source_addr & ~1);
   ctx->code.replace = true;
 
   return 0;
