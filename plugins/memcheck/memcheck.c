@@ -57,7 +57,7 @@ typedef struct {
 } malloc_header_t;
 
 int print_backtrace(void *data, void *addr, char *sym_name, void *symbol_base, char *filename) {
-  fprintf(stderr, "==memcheck==  at [%s]+%p (%p) in %s\n", sym_name, addr - symbol_base, addr, filename);
+  fprintf(stderr, "==memcheck==  at [%s]+%p (%p) in %s\n", sym_name, (void *)(addr - symbol_base), addr, filename);
   return 0;
 }
 
@@ -70,11 +70,11 @@ void memcheck_print_error(void *addr, uintptr_t meta, void *pc, stack_frame_t *f
   void *symbol_base;
   int ret = get_symbol_info_by_addr((uintptr_t)pc, &symbol, &symbol_base, &filename);
 
-  fprintf(stderr, "\n==memcheck== Invalid %s (size %d) %s %p\n", is_store ? "store" : "load", size, is_store ? "to" : "from", addr);
+  fprintf(stderr, "\n==memcheck== Invalid %s (size %zu) %s %p\n", is_store ? "store" : "load", size, is_store ? "to" : "from", addr);
 
   if (ret == 0) {
     while(filename == NULL || symbol_base == NULL);
-    fprintf(stderr, "==memcheck==  at [%s]+%p (%p) in %s\n", symbol, pc - symbol_base, pc, filename);
+    fprintf(stderr, "==memcheck==  at [%s]+%p (%p) in %s\n", symbol, (void *)(pc - symbol_base), pc, filename);
     free(filename);
     free(symbol);
   } else {
