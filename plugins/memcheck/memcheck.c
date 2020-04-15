@@ -302,6 +302,7 @@ bool memcheck_should_ignore(mambo_context *ctx) {
 }
 
 int memcheck_pre_inst_handler(mambo_context *ctx) {
+  int ret;
   if (mambo_is_load_or_store(ctx)) {
     if (memcheck_should_ignore(ctx)) return 0;
 
@@ -310,9 +311,14 @@ int memcheck_pre_inst_handler(mambo_context *ctx) {
     mambo_branch zbr;
 
     if (cond != AL) {
-      int ret = mambo_reserve_branch(ctx, &cond_br);
+      ret = mambo_reserve_branch(ctx, &cond_br);
       assert(ret == 0);
     }
+
+#ifdef __arm__
+    ret = mambo_reserve_cc_space(ctx, 88);
+    assert(ret == 0);
+#endif
 
 #ifdef COMPACT_SHADOW
     int access_size = mambo_get_ld_st_size(ctx);
@@ -352,13 +358,13 @@ int memcheck_pre_inst_handler(mambo_context *ctx) {
 
     emit_pop(ctx, (1 << 0) | (1 << 1) | (1 << 2) | (1 << 3));
     if (cond != AL) {
-      int ret = emit_local_branch_cond(ctx, &cond_br, invert_cond(cond));
+      ret = emit_local_branch_cond(ctx, &cond_br, invert_cond(cond));
       assert(ret == 0);
     }
 
 #else
     int regs[2];
-    int ret = mambo_get_scratch_regs(ctx, 2, &regs[0], &regs[1]);
+    ret = mambo_get_scratch_regs(ctx, 2, &regs[0], &regs[1]);
     assert(ret == 2);
 
     mambo_calc_ld_st_addr(ctx, regs[0]);
