@@ -22,12 +22,12 @@
 /* ignore invalid accesses from a whitelist of instructions found in glibc functions
    known to perform safe (aligned) out-of-bounds reads for performance optimisation
    may lead to false negatives */
-#define MC_IGNORE_LIST 1
+//#define MC_IGNORE_LIST 1
 
 /* replace the standard library functions known to have glibc implementations that
    perform safe (aligned) out-of-bounds reads for performance reasons
    the replacement implementations are naive - may affect application performance */
-//#define MC_REPLACE_FNS 1
+#define MC_REPLACE_FNS 1
 
 /* ignore errors in the dynamic loader
    some distributions seem to ship stripped linker executables, which means that we
