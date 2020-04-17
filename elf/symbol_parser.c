@@ -125,16 +125,21 @@ int get_backtrace(stack_frame_t *fp, stack_frame_handler handler, void *data) {
   void *symbol_base;
 
   if (fp != NULL && fp != (void *)1) {
+    stack_frame_t frame;
+    int frame_rerror;
     do {
       fp = get_frame(fp);
-      int ret = get_symbol_info_by_addr(fp->lr, &symbol, &symbol_base, &filename);
-      if (ret == 0) {
-        ret = handler(data, (void *)fp->lr, symbol, symbol_base, filename);
-        free(symbol);
-        free(filename);
-        if (ret != 0) return ret;
+      frame_rerror = try_memcpy(&frame, fp, sizeof(frame));
+      if (frame_rerror == 0) {
+        int ret = get_symbol_info_by_addr(frame.lr, &symbol, &symbol_base, &filename);
+        if (ret == 0) {
+          ret = handler(data, (void *)fp->lr, symbol, symbol_base, filename);
+          free(symbol);
+          free(filename);
+          if (ret != 0) return ret;
+        }
       }
-    } while((fp->prev > fp) && (fp = fp->prev));
+    } while(frame_rerror == 0 && (frame.prev > fp) && (fp = frame.prev));
 
     return 0;
   }
