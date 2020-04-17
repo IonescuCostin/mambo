@@ -39,6 +39,7 @@ extern void memcheck_install_naive_stdlib(mambo_context *ctx);
 #define MAGIC_FREED (UINTPTR_MAX-1)
 
 void *shadow_mem = NULL;
+void *loader_base = NULL;
 
 extern void memcheck_malloc_pre();
 extern void memcheck_malloc_post();
@@ -69,6 +70,9 @@ void memcheck_print_error(void *addr, uintptr_t meta, void *pc, stack_frame_t *f
   char *symbol;
   void *symbol_base;
   int ret = get_symbol_info_by_addr((uintptr_t)pc, &symbol, &symbol_base, &filename);
+#ifdef MC_IGNORE_INTERP
+  if(symbol_base == loader_base) return;
+#endif
 
   fprintf(stderr, "\n==memcheck== Invalid %s (size %zu) %s %p\n", is_store ? "store" : "load", size, is_store ? "to" : "from", addr);
 
@@ -517,6 +521,9 @@ int memcheck_vm_op_handler(mambo_context *ctx) {
     switch(op) {
       case VM_MAP:
         memcheck_mark_valid(mambo_get_vm_addr(ctx), mambo_get_vm_size(ctx));
+        if (loader_base == NULL && (mambo_get_vm_flags(ctx) & MAP_INTERP)) {
+          loader_base = mambo_get_vm_addr(ctx);
+        }
         break;
       case VM_UNMAP:
         memcheck_mark_invalid(mambo_get_vm_addr(ctx), mambo_get_vm_size(ctx));

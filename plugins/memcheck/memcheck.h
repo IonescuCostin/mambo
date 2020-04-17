@@ -19,7 +19,7 @@
 
 #define COMPACT_SHADOW 1
 
-/* ignore invalid accesses from a list of instructions found in glibc functions
+/* ignore invalid accesses from a whitelist of instructions found in glibc functions
    known to perform safe (aligned) out-of-bounds reads for performance optimisation
    may lead to false negatives */
 #define MC_IGNORE_LIST 1
@@ -28,6 +28,13 @@
    perform safe (aligned) out-of-bounds reads for performance reasons
    the replacement implementations are naive - may affect application performance */
 //#define MC_REPLACE_FNS 1
+
+/* ignore errors in the dynamic loader
+   some distributions seem to ship stripped linker executables, which means that we
+   can't hook their embedded stdlib functions, so we'll get some false positive errors
+   as the dynamic loader sets up
+   this options will cause memcheck to ignore all invalid accesses in the loader */
+#define MC_IGNORE_INTERP 1
 
 #ifdef COMPACT_SHADOW
   #define SHADOW_SIZE (RESERVED_BASE/8)
