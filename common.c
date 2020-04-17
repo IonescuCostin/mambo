@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
+#include <ucontext.h>
 
 #include "dbm.h"
 #include "common.h"
@@ -410,3 +411,34 @@ void mambo_memcpy(void *dst, void *src, size_t l) {
   }
 }
 
+__thread ucontext_t try_memcpy_ctx;
+__thread volatile int try_memcpy_status = 0;
+
+void memcpy_fault(int i) {
+  try_memcpy_status = -1;
+  setcontext(&try_memcpy_ctx);
+  assert(0);
+}
+
+int try_memcpy(void *dst, void *src, size_t n) {
+  struct sigaction act, oldact;
+  act.sa_handler = memcpy_fault;
+  sigemptyset(&act.sa_mask);
+  act.sa_flags = 0;
+  int ret = sigaction(SIGSEGV, &act, &oldact);
+  assert(ret == 0);
+
+  try_memcpy_status = 0;
+
+  ret = getcontext(&try_memcpy_ctx);
+  assert(ret == 0);
+
+  if (try_memcpy_status == 0) {
+    mambo_memcpy(dst, src, n);
+  }
+
+  ret = sigaction(SIGSEGV, &oldact, NULL);
+  assert(ret == 0);
+
+  return try_memcpy_status;
+}
