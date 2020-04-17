@@ -431,7 +431,7 @@ int mambo_get_vm_prot(mambo_context *ctx) {
 
 int mambo_get_vm_flags(mambo_context *ctx) {
   assert(ctx->event_type == VM_OP_C);
-  return ctx->vm.size;
+  return ctx->vm.flags;
 }
 
 int mambo_get_vm_filedes(mambo_context *ctx) {
