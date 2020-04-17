@@ -656,7 +656,7 @@ __attribute__((constructor)) void memcheck_init_plugin() {
 
   ret = mambo_register_function_cb(ctx, "malloc_usable_size", &memcheck_replace_malloc_usable_size, NULL, 1);
   assert(ret == MAMBO_SUCCESS);
-#ifdef REPLACE_FNS
+#ifdef MC_REPLACE_FNS
   memcheck_install_naive_stdlib(ctx);
 #endif
 }

@@ -27,7 +27,7 @@
 /* replace the standard library functions known to have glibc implementations that
    perform safe (aligned) out-of-bounds reads for performance reasons
    the replacement implementations are naive - may affect application performance */
-//#define REPLACE_FNS 1
+//#define MC_REPLACE_FNS 1
 
 #ifdef COMPACT_SHADOW
   #define SHADOW_SIZE (RESERVED_BASE/8)
