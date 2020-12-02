@@ -74,6 +74,12 @@ cachesim:
 memcheck:
 	PLUGINS="plugins/memcheck/memcheck.S plugins/memcheck/memcheck.c plugins/memcheck/naive_stdlib.c" OUTPUT_FILE=mambo_memcheck make
 
+branchcheck:
+	PLUGINS="plugins/branch_check/branch_check.c" OUTPUT_FILE=mambo_branchcheck make
+
+symbols:
+	PLUGINS="plugins/symbol_example.c" OUTPUT_FILE=mambo_symbols make
+
 clean:
 	rm -f dbm elf/elf_loader.o elf/symbol_parser.o
 
