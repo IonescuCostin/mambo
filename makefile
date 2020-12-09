@@ -69,16 +69,19 @@ $(or $(OUTPUT_FILE),dbm): $(HEADERS) $(SOURCES) $(PLUGINS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OPTS) $(INCLUDES) -o $@ $(SOURCES) $(PLUGINS) $(PIE) $(LIBS) $(PLUGIN_ARGS)
 
 cachesim:
-	PLUGINS="plugins/cachesim/cachesim.c plugins/cachesim/cachesim.S plugins/cachesim/cachesim_model.c" OUTPUT_FILE=mambo_cachesim make
+	PLUGINS="plugins/cachesim/cachesim.c plugins/cachesim/cachesim.S plugins/cachesim/cachesim_model.c" OUTPUT_FILE=mambo_cachesim.out make
 
 memcheck:
-	PLUGINS="plugins/memcheck/memcheck.S plugins/memcheck/memcheck.c plugins/memcheck/naive_stdlib.c" OUTPUT_FILE=mambo_memcheck make
+	PLUGINS="plugins/memcheck/memcheck.S plugins/memcheck/memcheck.c plugins/memcheck/naive_stdlib.c" OUTPUT_FILE=mambo_memcheck.out make
 
 branchcheck:
-	PLUGINS="plugins/branch_check/branch_check.c" OUTPUT_FILE=mambo_branchcheck make
+	PLUGINS="plugins/branch_check/branch_check.c" OUTPUT_FILE=mambo_branchcheck.out make
+
+checkreturns:
+	PLUGINS="plugins/check_returns/check_returns.c" OUTPUT_FILE=mambo_checkreturns.out make
 
 symbols:
-	PLUGINS="plugins/symbol_example.c" OUTPUT_FILE=mambo_symbols make
+	PLUGINS="plugins/symbol_example.c" OUTPUT_FILE=mambo_symbols.out make
 
 clean:
 	rm -f dbm elf/elf_loader.o elf/symbol_parser.o
