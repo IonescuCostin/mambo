@@ -3,7 +3,7 @@
       https://github.com/beehive-lab/mambo
 
   Copyright 2013-2016 Cosmin Gorgovan <cosmin at linux-geek dot org>
-  Copyright 2017 The University of Manchester
+  Copyright 2017-2020 The University of Manchester
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -997,7 +997,7 @@ bool thumb_scanner_deliver_callbacks(dbm_thread *thread_data, mambo_cb_idx cb_id
   return replaced;
 }
 
-size_t scan_thumb(dbm_thread *thread_data, uint16_t *read_address, int basic_block, cc_type type, uint16_t *write_p) {
+size_t scan_t32(dbm_thread *thread_data, uint16_t *read_address, int basic_block, cc_type type, uint16_t *write_p) {
   bool stop = false;
 
   uint16_t *start_scan = read_address;

@@ -114,6 +114,7 @@ typedef enum {
   cond_imm_a64,
   cbz_a64,
   tbz_a64,
+  trace_exit
 #endif // __aarch64__
 } branch_type;
 
@@ -130,6 +131,7 @@ typedef struct {
 #define BRANCH_LINKED (1 << 1)
 #define BOTH_LINKED (1 << 2)
 
+#define MAX_SAVED_EXIT_SZ 12
 typedef struct {
   uint16_t *source_addr;
   uintptr_t tpc;
@@ -148,6 +150,7 @@ typedef struct {
   uint32_t rn;
   uint32_t free_b;
   ll_entry *linked_from;
+  uint8_t saved_exit[MAX_SAVED_EXIT_SZ];
 } dbm_code_cache_meta;
 
 typedef struct {
@@ -161,6 +164,9 @@ typedef struct {
 struct trace_exits {
   uintptr_t from;
   uintptr_t to;
+#ifdef __aarch64__
+  int fragment_id;
+#endif
 };
 
 #define MAX_TRACE_REC_EXITS (MAX_TRACE_FRAGMENTS+1)
@@ -313,15 +319,12 @@ uintptr_t cc_lookup(dbm_thread *thread_data, uintptr_t target);
 uintptr_t lookup_or_scan(dbm_thread *thread_data, uintptr_t target, bool *cached);
 uintptr_t lookup_or_stub(dbm_thread *thread_data, uintptr_t target);
 uintptr_t scan(dbm_thread *thread_data, uint16_t *address, int basic_block);
-uint32_t scan_arm(dbm_thread *thread_data, uint32_t *read_address, int basic_block, cc_type type, uint32_t *write_p);
-uint32_t scan_thumb(dbm_thread *thread_data, uint16_t *read_address, int basic_block, cc_type type, uint16_t *write_p);
+uint32_t scan_a32(dbm_thread *thread_data, uint32_t *read_address, int basic_block, cc_type type, uint32_t *write_p);
+uint32_t scan_t32(dbm_thread *thread_data, uint16_t *read_address, int basic_block, cc_type type, uint16_t *write_p);
 size_t   scan_a64(dbm_thread *thread_data, uint32_t *read_address, int basic_block, cc_type type, uint32_t *write_p);
 int allocate_bb(dbm_thread *thread_data);
 void trace_dispatcher(uintptr_t target, uintptr_t *next_addr, uint32_t source_index, dbm_thread *thread_data);
 void flush_code_cache(dbm_thread *thread_data);
-#ifdef __aarch64__
-void generate_trace_exit(dbm_thread *thread_data, uint32_t **o_write_p, int fragment_id, bool is_taken);
-#endif
 void insert_cond_exit_branch(dbm_code_cache_meta *bb_meta, void **o_write_p, int cond);
 void sigret_dispatcher_call(dbm_thread *thread_data, ucontext_t *cont, uintptr_t target);
 
@@ -333,7 +336,6 @@ int addr_to_fragment_id(dbm_thread *thread_data, uintptr_t addr);
 void record_cc_link(dbm_thread *thread_data, uintptr_t linked_from, uintptr_t linked_to_addr);
 bool is_bb(dbm_thread *thread_data, uintptr_t addr);
 void install_system_sig_handlers();
-
 
 #define MAP_INTERP (0x40000000)
 #define MAP_APP (0x20000000)

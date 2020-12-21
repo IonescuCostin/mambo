@@ -3,7 +3,7 @@
       https://github.com/beehive-lab/mambo
 
   Copyright 2013-2016 Cosmin Gorgovan <cosmin at linux-geek dot org>
-  Copyright 2017 The University of Manchester
+  Copyright 2017-2020 The University of Manchester
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -538,7 +538,7 @@ void arm_ihl_tr_rn_rm(uint32_t **o_write_p, uint32_t *read_address, uint32_t ava
   *o_write_p = write_p;
 }
 
-size_t scan_arm(dbm_thread *thread_data, uint32_t *read_address, int basic_block, cc_type type, uint32_t *write_p) {
+size_t scan_a32(dbm_thread *thread_data, uint32_t *read_address, int basic_block, cc_type type, uint32_t *write_p) {
   bool stop = false;
 
   uint32_t *scratch_data;
