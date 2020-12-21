@@ -7,8 +7,10 @@
 #include <inttypes.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include "../../plugins.h"
+#include <sys/mman.h>
+#include <string.h>
 
+#include "../../plugins.h"
 #include "../../dbm.h"
 #include "../../elf/elf_loader.h"
 
@@ -17,6 +19,7 @@
 //------------------------------------------------------------------------------
 bool is_first_thread;
 mambo_ht_t valid_addresses;
+int count;
 
 
 //------------------------------------------------------------------------------
@@ -50,39 +53,77 @@ int check_returns_pre_inst_handler(mambo_context *ctx) {
 // Before starting the main thread build a hashtable with all of the valid 
 // function addresses from the output of obj_dump
 int check_returns_pre_thread(mambo_context *ctx) {
-  int ret;
   if(is_first_thread){
     // Initalize the hashtable
-    ret = mambo_ht_init(&valid_addresses, 10000, 0, 70, true);
+    int ret = mambo_ht_init(&valid_addresses, 10000, 0, 70, true);
     assert(ret == 0);
-
-    // Load valid return addresses from a file
-    FILE* fd = fopen ("/home/ubuntu/mambo/plugins/check_returns/return_addresses.txt", "r");
     
-    if(fd == NULL)
-    {
-      printf("couldnt open %s\n", "return_addresses.txt");
+    // Dissasamble the binary
+    char *file_name = global_data.argv[1];
+    char cmd[strlen(file_name) + 30];
+    strcpy(cmd, "objdump --disassemble-all ");
+    strcat(cmd, file_name);
+
+    FILE *objdump_out;
+    char buffer[1001];
+
+    // Open dissasembly output for reading
+    objdump_out = popen(cmd, "r");
+    if (objdump_out == NULL) {
+      printf("Failed to run dissasamble\n" );
       exit(EXIT_FAILURE);
     }
- 
-    // Parse the file and insert all valid return addresses into a hash table
-    int i;
-    while (!feof (fd))
-    {
-      fscanf (fd, "%d", &i);
-      uintptr_t value;
-      
-      ret = mambo_ht_get(&valid_addresses, i, &value);
-      if(ret != 0){
-        ret = mambo_ht_add(&valid_addresses, i, 1);
-        assert(ret == 0);
-      }
-      // printf ("%d\n", i);     
-    }
 
-    fclose (fd);        
+    // Parse the output and scan for BL or BLR instructions
+    while (fgets(buffer, sizeof(buffer), objdump_out) != NULL) {
+      if(strstr(buffer, "\tbl\t") != NULL || strstr(buffer, "\tblr\t") != NULL){
+        // Extract the address
+        char *token = strtok(buffer, " \t");
+        token[strlen(token) - 1] = '\0';
+        uint32_t ret_addr = (int)strtol(token, NULL, 16) + 4;
+
+        uintptr_t value;      
+        ret = mambo_ht_get(&valid_addresses, ret_addr, &value);
+        if(ret != 0){
+          ret = mambo_ht_add(&valid_addresses, ret_addr, 1);
+          assert(ret == 0);
+        }
+      }
+    } // while
+
+
+    // Close
+    pclose(objdump_out);
     is_first_thread = false;
   }
+} // check_returns_pre_thread
+
+
+// Virtual memory operation callbacks
+// int check_returns_vm_op_handler(mambo_context *ctx) {
+//   vm_op_t type = mambo_get_vm_op(ctx);
+
+//   int addr = mambo_get_vm_addr(ctx);
+//   int size = mambo_get_vm_size(ctx);
+//   int filedes = mambo_get_vm_filedes(ctx);
+//   int prot = mambo_get_vm_prot(ctx);
+
+//   if((type == VM_MAP) && (filedes > 0) && ((prot & PROT_EXEC) == PROT_EXEC)){
+//     printf("%d \n", filedes);
+//     printf("%d \n", prot&PROT_EXEC);
+//     printf("%X \n", mambo_get_vm_flags(ctx));
+//     printf("addr: %X\nsize: %d\n\n", addr, size);
+//   }
+
+//   // if(result == VM_MAP &&  > 0 && ( & PROT_EXEC) == 1){
+//   //   printf("addr: %X\nsize: %d\n\n", addr, size);
+//   //   count++;
+//   // }
+// }
+
+// Exit callback
+int check_returns_exit_handler(mambo_context *ctx) {
+  printf("VM_OP counter %d\n", count);
 }
 
 __attribute__((constructor)) void check_returns_init_plugin() {
@@ -96,7 +137,14 @@ __attribute__((constructor)) void check_returns_init_plugin() {
 
   int ret = mambo_register_pre_inst_cb(ctx, &check_returns_pre_inst_handler);
   assert(ret == MAMBO_SUCCESS);
+
+  // count = 0;
+  // ret = mambo_register_vm_op_cb(ctx, &check_returns_vm_op_handler);
+  // assert(ret == MAMBO_SUCCESS);
   
   ret = mambo_register_pre_thread_cb(ctx, &check_returns_pre_thread);
   assert(ret == MAMBO_SUCCESS);
+
+  // ret = mambo_register_exit_cb(ctx, &check_returns_exit_handler);
+  // assert(ret == MAMBO_SUCCESS);
 }
