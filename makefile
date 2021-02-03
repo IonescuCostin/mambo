@@ -28,7 +28,7 @@ LIBS=-lelf -lpthread -lz
 HEADERS=*.h makefile
 INCLUDES=-I/usr/include/libelf -I.
 SOURCES= common.c dbm.c traces.c syscalls.c dispatcher.c signals.c util.S
-SOURCES+=api/helpers.c api/plugin_support.c api/branch_decoder_support.c api/load_store.c api/internal.c api/hash_table.c
+SOURCES+=api/helpers.c api/plugin_support.c api/branch_decoder_support.c api/load_store.c api/internal.c api/hash_table.c api/queue.c
 SOURCES+=elf/elf_loader.o elf/symbol_parser.o
 
 ARCH=$(shell $(CC) -dumpmachine | awk -F '-' '{print $$1}')
@@ -75,6 +75,9 @@ cachesim:
 
 memcheck:
 	PLUGINS="plugins/memcheck/memcheck.S plugins/memcheck/memcheck.c plugins/memcheck/naive_stdlib.c" OUTPUT_FILE=mambo_memcheck make
+
+validate_switch:
+	PLUGINS="plugins/validate_switch/validate_switch.c" OUTPUT_FILE=mambo_validateswitch.out make
 
 clean:
 	rm -f dbm elf/elf_loader.o elf/symbol_parser.o
