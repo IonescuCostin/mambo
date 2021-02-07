@@ -19,7 +19,6 @@
 //------------------------------------------------------------------------------
 bool is_first_thread;
 mambo_ht_t valid_addresses;
-int count;
 
 
 //------------------------------------------------------------------------------
@@ -30,9 +29,8 @@ void check_address(void* addr){
 
   uintptr_t value;
   int ret = mambo_ht_get(&valid_addresses, (uintptr_t)addr, &value);
-  
   if(ret != 0){;
-    fprintf(stderr, "Encountered invalid return to %lX\n", addr);
+    fprintf(stderr, "Encountered invalid return to %p\n", addr);
     exit(EXIT_FAILURE);
   }
 }
@@ -90,36 +88,11 @@ int check_returns_pre_thread(mambo_context *ctx) {
         }
       }
     } // while
-
-
     // Close
     pclose(objdump_out);
     is_first_thread = false;
   }
 } // check_returns_pre_thread
-
-
-// Virtual memory operation callbacks
-int check_returns_vm_op_handler(mambo_context *ctx) {
-  vm_op_t type = mambo_get_vm_op(ctx);
-
-  int addr = mambo_get_vm_addr(ctx);
-  int size = mambo_get_vm_size(ctx);
-  int filedes = mambo_get_vm_filedes(ctx);
-  int prot = mambo_get_vm_prot(ctx);
-
-  if((type == VM_MAP) && (filedes > 0) && ((prot & PROT_EXEC) == PROT_EXEC)){
-    printf("%d \n", filedes);
-    printf("%d \n", prot&PROT_EXEC);
-    printf("%X \n", mambo_get_vm_flags(ctx));
-    printf("addr: %X\nsize: %d\n\n", addr, size);
-  }
-}
-
-// Exit callback
-int check_returns_exit_handler(mambo_context *ctx) {
-  printf("VM_OP counter %d\n", count);
-}
 
 __attribute__((constructor)) void check_returns_init_plugin() {
 
@@ -132,14 +105,7 @@ __attribute__((constructor)) void check_returns_init_plugin() {
 
   int ret = mambo_register_pre_inst_cb(ctx, &check_returns_pre_inst_handler);
   assert(ret == MAMBO_SUCCESS);
-
-  count = 0;
-  ret = mambo_register_vm_op_cb(ctx, &check_returns_vm_op_handler);
-  assert(ret == MAMBO_SUCCESS);
   
   ret = mambo_register_pre_thread_cb(ctx, &check_returns_pre_thread);
-  assert(ret == MAMBO_SUCCESS);
-
-  ret = mambo_register_exit_cb(ctx, &check_returns_exit_handler);
   assert(ret == MAMBO_SUCCESS);
 }
