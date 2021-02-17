@@ -59,7 +59,7 @@ int check_returns_pre_thread(mambo_context *ctx) {
     // Dissasamble the binary
     char *file_name = global_data.argv[1];
     char cmd[strlen(file_name) + 30];
-    strcpy(cmd, "objdump --disassemble-all ");
+    strcpy(cmd, "objdump -d ");
     strcat(cmd, file_name);
 
     FILE *objdump_out;
