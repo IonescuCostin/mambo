@@ -19,21 +19,22 @@
 //------------------------------------------------------------------------------
 bool is_first_thread;
 mambo_ht_t valid_addresses;
-
+uintptr_t vdso_base;
 
 //------------------------------------------------------------------------------
 // Functions
 //------------------------------------------------------------------------------
 //Function used to check if the branch address is a valid function address
 void check_address(void* addr){
-
-  uintptr_t value;
-  int ret = mambo_ht_get(&valid_addresses, (uintptr_t)addr, &value);
-  if(ret != 0){;
-    fprintf(stderr, "Encountered invalid return to %p\n", addr);
-    exit(EXIT_FAILURE);
+  if(addr < vdso_base || addr > vdso_base*(PAGE_SIZE*2)){
+    uintptr_t value;
+    int ret = mambo_ht_get(&valid_addresses, (uintptr_t)addr, &value);
+    if(ret != 0){
+      fprintf(stderr, "Encountered invalid return to %p\n", addr);
+      exit(EXIT_FAILURE);
+    }
   }
-}
+}// check_address
 
 // When executing a return instruction check if the returna address
 // is valid
@@ -100,6 +101,7 @@ __attribute__((constructor)) void check_returns_init_plugin() {
   assert(ctx != NULL);
 
   is_first_thread = true;
+  vdso_base = getauxval(AT_SYSINFO_EHDR);
 
   printf("\n--- MAMBO check returns ---\n\n");
 
